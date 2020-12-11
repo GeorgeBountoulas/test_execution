@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "test_execution": {
+      "commandName": "Project",
+      "commandLineArgs": "17.2.1"
+    }
+  }
+}

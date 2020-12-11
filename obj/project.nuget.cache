@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Nys0ikXsUUUwTO32FMRow5iqk/H29zCFWFNk/MMocLac+fAC4pUYkTbBS5eZrr4uS5z3363aNYQIlyEY/saDKA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\george.bountoulas\\Documents\\GitHub\\test_execution\\test_execution.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\george.bountoulas\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\george.bountoulas\\.nuget\\packages\\sevenzip\\19.0.0\\sevenzip.19.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
