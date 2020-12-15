@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using SevenZip;
-using test_execution.TestExecution;
+//using test_execution.TestExecution;
 using Newtonsoft.Json;
 using SevenZip.Compression.LZMA;
 
@@ -25,9 +25,9 @@ namespace test_execution.TestExecution
         }
 
         private static void ExtractCats(string archivePath, string destinationPath)
-        {            
+        {
             try
-            {                
+            {
                 //get the archive name                
                 string archiveName = Path.GetFileNameWithoutExtension(archivePath);
                 Console.WriteLine($"Extracting {archiveName} from {archivePath}!");
@@ -37,43 +37,62 @@ namespace test_execution.TestExecution
                 ProcessStartInfo pro = new ProcessStartInfo();
                 pro.WindowStyle = ProcessWindowStyle.Hidden;
                 pro.FileName = TestParameters.ZIP_PATH;
-                pro.Arguments = string.Format($"x {archivePath} -y -o{destinationPath}\\{archiveName}" );
+                pro.Arguments = string.Format($"x {archivePath} -y -o{destinationPath}\\{archiveName}");
                 Process x = Process.Start(pro);
                 x.WaitForExit();
 
-                //ZipFile.ExtractToDirectory(catsPath, TestParameters.CATS_INSTALLATION_LOCATION);
-                Console.WriteLine($"CATS successfully extracted in {destinationPath}\\{archiveName}!");
+                if (Directory.Exists($"{destinationPath}\\{archiveName}"))
+                {
+                
+                    //ZipFile.ExtractToDirectory(catsPath, TestParameters.CATS_INSTALLATION_LOCATION);
+                    Console.WriteLine($"CATS successfully extracted in '{destinationPath}\\{archiveName}'!");
+                }
+                else
+                {
+                    Console.WriteLine("Error extracting CATS!");
+                }
             }
+
             catch (System.Exception excpt)
             {
                 Console.WriteLine(excpt.Message);
             }
         }
 
-        public static void CatsInstallation(string catsVersion)
-        {
-            //Search if the CATS is already installed in the PC
+        public static string CatsInstallation(string catsVersion)
+        {            
             string[] releasedCatsVersions;
+
+            //Search if the CATS version is already installed 
             string[] installedCatsVersions = InstallCats.GetInstalledCatsVersions(catsVersion, TestParameters.CATS_INSTALLATION_LOCATION);
             if (installedCatsVersions.Length == 0)
             {
                 Console.WriteLine($"CATS version v{catsVersion} is not installed!");
                 Console.WriteLine($"Searching in {TestParameters.CATS_SOFTWARE_LOCATION}.");
 
-                // search for CATS in the released folder
+                // search for CATS in the released folder if there are the required CATS version is not already installed
                 releasedCatsVersions = InstallCats.GetReleasedCatsVersions(catsVersion, TestParameters.CATS_SOFTWARE_LOCATION);
                 if (releasedCatsVersions.Length == 0)
                 {
-                    // search for the requested CATS in the archived folder
+                    
                     Console.WriteLine($"Searching in {TestParameters.CATS_ARCHIVED_LOCATION}.");
-
+                    // search for the required CATS in the archived folder
                     releasedCatsVersions = InstallCats.GetReleasedCatsVersions(catsVersion, TestParameters.CATS_ARCHIVED_LOCATION);
 
-                    Console.WriteLine($"The number of directories starting with '{catsVersion}' is {releasedCatsVersions.Length}.");
-                    foreach (string dir in releasedCatsVersions)
+                    //Console.WriteLine($"The number of directories starting with '{catsVersion}' is {releasedCatsVersions.Length}.");
+                    if (releasedCatsVersions.Length == 0)
                     {
-                        Console.WriteLine(dir);
+                        Console.WriteLine($"***The requrested CATS version v{catsVersion} could not be found***");
+                        Environment.Exit(1);
                     }
+                    else
+                    {
+                        foreach (string dir in releasedCatsVersions)
+                        {
+                            Console.WriteLine(dir);
+                            
+                        }
+                    }                    
                 }
                 else
                 {
@@ -86,18 +105,42 @@ namespace test_execution.TestExecution
 
                 //Extract CATS to the runner
                 ExtractCats(releasedCatsVersions[0], TestParameters.CATS_INSTALLATION_LOCATION);
-                //DecompressFileLZMA(releasedCatsVersions[0], TestParameters.CATS_INSTALLATION_LOCATION);
-                //DecompressFileLZMA("C:\\CML\\Cats-22.4.1.7z", "C:\\CML\\MITSystemArchitecture_test.pdf");
-                //CompressFileLZMA("C:\\CML\\CATS_script_rework", "C:\\CML\\CATS_script_rework.7z");
+
+                //get the exact name of the folder that CATS was extracted and use it to copy the license file
+                string folderName = Path.GetFileNameWithoutExtension(releasedCatsVersions[0]);
+
+                // To copy the CATS license file to the file to another location 
+                Console.WriteLine($"Copying CATS License to '{TestParameters.CATS_INSTALLATION_LOCATION}\\{folderName}\\Data\\'.");
+                System.IO.File.Copy(TestParameters.CATS_LICENSE_LOCATION, $"{TestParameters.CATS_INSTALLATION_LOCATION}\\{folderName}\\Data\\Cats.lic", false);
+
+                return $"{TestParameters.CATS_INSTALLATION_LOCATION}\\{folderName}\\";
             }
             else
             {
-                Console.WriteLine($"The number of directories starting with '{catsVersion}' is {installedCatsVersions.Length}.");
-                foreach (string dir in installedCatsVersions)
+                // if the versions that match the requested CATS version are more than one then exit with code 1
+                if (installedCatsVersions.Length>1)
                 {
-                    Console.WriteLine(dir);
+                    Console.WriteLine($"Found {installedCatsVersions.Length} instances of CATS version '{catsVersion}' installed on the runner.");
+                    foreach (string dir in installedCatsVersions)
+                    {
+                        Console.WriteLine(dir);
+                    }
+                    Environment.Exit(1);
                 }
-            }            
+                else //check if the license file exist in the Data folder
+                {
+                    Console.WriteLine($"CATS version {catsVersion} is already installed!");
+                    if (!File.Exists($"{installedCatsVersions[0]}\\Data\\Cats.lic"))
+                    {
+                        Console.WriteLine("CATS License file NOT found! Copying license File.");
+                        // To copy the CATS license file to the file to another location 
+                        System.IO.File.Copy(TestParameters.CATS_LICENSE_LOCATION, $"{installedCatsVersions[0]}\\Data\\Cats.lic", false);
+                    }
+
+                }
+                return installedCatsVersions[0];
+            } 
+            
         }
 
 /*        private static void DecompressFileLZMA(string inFile, string outFolder)

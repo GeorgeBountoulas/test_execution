@@ -9,6 +9,10 @@ namespace test_execution.TestExecution
         public const string CATS_SOFTWARE_LOCATION = @"\\ws-fs1\Company\\Technical\Software\Cats";
         // Archived versions of CATS
         public const string CATS_ARCHIVED_LOCATION = @"\\WS-FS1\archive\Archive\Technical\Software\Cats";
+        //CATS license relative location
+        public const string CATS_LICENSE_LOCATION = @"C:\Cats\Cats.lic";
+        //CATS License filename
+        public const string CATS_LICENSE_NAME = "cats.lic";
         //7zip executable location
         public const string ZIP_PATH = @"C:\Program Files\7-Zip\7z.exe";
     }
